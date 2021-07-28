@@ -1,2 +1,2 @@
 # GraphColoring
-C++ Graph Coloring Algorithm
+Graph Coloring Algorithm in Multi-Thread environment
