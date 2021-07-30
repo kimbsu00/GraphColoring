@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include <mutex>
 
 using namespace std;
 
@@ -18,8 +19,10 @@ public:
 	int degree;
 	// 직접 연결되어 있는 노드들
 	vector<Node*> adjacent;
-	// 노드의 현재 상태를 의미함
+	// Node의 현재 상태를 의미함
 	int n_flag;
+	// n_flag에 대한 mutex
+	mutex n_flag_mutex;
 
 	Node();
 	Node(int index);
@@ -27,6 +30,8 @@ public:
 	~Node();
 
 	bool check();
+	void set_n_flag(int n_flag);
+
 	bool operator <(const Node& other) const;
 };
 

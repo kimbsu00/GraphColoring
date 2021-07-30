@@ -29,7 +29,14 @@ bool Node::check()
 	return true;
 }
 
+void Node::set_n_flag(int n_flag)
+{
+	this->n_flag_mutex.lock();
+	this->n_flag = n_flag;
+	this->n_flag_mutex.unlock();
+}
+
 bool Node::operator<(const Node& other) const
 {
-	return this->degree < other.degree;
+	return this->degree > other.degree;
 }
