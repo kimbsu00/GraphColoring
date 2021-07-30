@@ -27,7 +27,11 @@ void Graph::insert(int p, int q)
 	task[q]->degree += 1;
 }
 
+bool compare(const Node* a, const Node* b) {
+	return a->degree > b->degree;
+}
+
 void Graph::sort_task()
 {
-	sort(task.begin(), task.end());
+	sort(task.begin(), task.end(), compare);
 }
