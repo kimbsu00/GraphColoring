@@ -65,7 +65,7 @@ void coloring(int index) {
 
 int main(void) {
 	if (!make_graph()) {
-		cout << "text 파일을 열 수 없음.\n";
+		cout << "test file is not open.\n";
 		return 0;
 	}
 
