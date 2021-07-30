@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include <algorithm>
 #include "Node.h"
 
 using namespace std;
@@ -15,5 +16,6 @@ public:
 	~Graph();
 
 	void insert(int p, int q);
+	void sort_task();
 };
 

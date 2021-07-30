@@ -26,3 +26,8 @@ void Graph::insert(int p, int q)
 	task[q]->adjacent.push_back(task[p]);
 	task[q]->degree += 1;
 }
+
+void Graph::sort_task()
+{
+	sort(task.begin(), task.end());
+}
