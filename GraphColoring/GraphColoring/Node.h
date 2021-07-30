@@ -31,7 +31,5 @@ public:
 
 	bool check();
 	void set_n_flag(int n_flag);
-
-	bool operator <(const Node& other) const;
 };
 
