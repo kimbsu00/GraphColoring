@@ -142,10 +142,12 @@
     <ClCompile Include="Graph.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Node.cpp" />
+    <ClCompile Include="TCB.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Graph.h" />
     <ClInclude Include="Node.h" />
+    <ClInclude Include="TCB.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
