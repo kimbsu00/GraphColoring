@@ -5,6 +5,7 @@
 #include <string>
 #include <fstream>
 #include <sstream>
+#include <algorithm>
 #include "Graph.h"
 #include "TCB.h"
 
@@ -53,14 +54,17 @@ bool make_graph() {
 		graph->insert(p, q);
 	}
 
-	graph->sort_task();
+	return true;
 }
 
-void coloring(int index) {
-	// test code
-	tcb[index]->t_flag_mutex.lock();
-	cout << tcb[index]->t_flag << "\n";
-	tcb[index]->t_flag_mutex.unlock();
+void coloring() {
+
+}
+
+void selecting(int index) {
+	sort(tcb[index]->task.begin(), tcb[index]->task.end(), Node::compare);
+
+
 }
 
 int main(void) {
@@ -72,11 +76,23 @@ int main(void) {
 	vector<thread*> threads(MAX_THREAD_NUM, nullptr);
 	for (int i = 0; i < threads.size(); i++) {
 		tcb.push_back(new TCB(i));
-		threads[i] = new thread(coloring, i);
+	}
+	graph->distribute_task_to_thread(tcb);
+
+	for (int i = 0; i < threads.size(); i++) {
+		threads[i] = new thread(selecting, i);
 	}
 
 	for (int i = 0; i < threads.size(); i++) {
 		threads[i]->join();
+	}
+
+	// test code
+	for (int i = 0; i < tcb.size(); i++) {
+		cout << "\n\nTCB #" << i << "\n";
+		for (int j = 0; j < tcb[i]->task.size(); j++) {
+			cout << tcb[i]->task[j]->degree << "\n";
+		}
 	}
 
 	return 0;
