@@ -1,18 +1,19 @@
 #include "Node.h"
 
 Node::Node()
-	: index(-1), degree(-1), n_flag(CAN_SELECT)
+	: index(-1), degree(0), n_flag(CAN_SELECT), color(-1)
 {
 }
 
 Node::Node(int index)
-	: index(index), degree(-1), n_flag(CAN_SELECT)
+	: index(index), degree(0), n_flag(CAN_SELECT), color(-1)
 {
 }
 
-Node::Node(int index, int degree)
-	: index(index), degree(degree), n_flag(CAN_SELECT)
+Node::Node(int index, int num_of_node)
+	: index(index), degree(0), n_flag(CAN_SELECT), color(-1)
 {
+	n_color.resize(num_of_node, true);
 }
 
 Node::~Node()
@@ -34,4 +35,16 @@ void Node::set_n_flag(int n_flag)
 	this->n_flag_mutex.lock();
 	this->n_flag = n_flag;
 	this->n_flag_mutex.unlock();
+}
+
+void Node::update_n_color(int already_used_color)
+{
+	this->n_color_mutex.lock();
+	this->n_color[already_used_color] = false;
+	this->n_color_mutex.unlock();
+}
+
+bool Node::compare(const Node* a, const Node* b)
+{
+	return a->degree > b->degree;
 }
