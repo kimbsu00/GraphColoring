@@ -2,6 +2,7 @@
 #include <vector>
 #include <algorithm>
 #include "Node.h"
+#include "TCB.h"
 
 using namespace std;
 
@@ -12,10 +13,10 @@ public:
 	vector<Node*> task;
 
 	Graph();
-	Graph(int count);
+	Graph(int num_of_node);
 	~Graph();
 
 	void insert(int p, int q);
-	void sort_task();
+	void distribute_task_to_thread(vector<TCB*>& tcb);
 };
 

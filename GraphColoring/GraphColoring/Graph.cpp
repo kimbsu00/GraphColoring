@@ -4,10 +4,10 @@ Graph::Graph()
 {
 }
 
-Graph::Graph(int count)
+Graph::Graph(int num_of_node)
 {
-	for (int i = 0; i < count; i++) {
-		task.push_back(new Node(i));
+	for (int i = 0; i < num_of_node; i++) {
+		task.push_back(new Node(i, num_of_node));
 	}
 }
 
@@ -27,11 +27,12 @@ void Graph::insert(int p, int q)
 	task[q]->degree += 1;
 }
 
-bool compare(const Node* a, const Node* b) {
-	return a->degree > b->degree;
-}
-
-void Graph::sort_task()
+void Graph::distribute_task_to_thread(vector<TCB*>& tcb)
 {
-	sort(task.begin(), task.end(), compare);
+	const int mod = tcb.size();
+
+	for (int i = 0; i < task.size(); i++) {
+		int index = task[i]->index % mod;
+		tcb[index]->task.push_back(task[i]);
+	}
 }
