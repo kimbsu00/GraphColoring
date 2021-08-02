@@ -7,29 +7,33 @@ using namespace std;
 enum N_FLAG {
 	CAN_SELECT,
 	SELECTED,
+	WAIT,
 	COLORED
 };
 
 class Node
 {
 public:
-	// NodeÀÇ °íÀ¯ ¹øÈ£, 0 ÀÌ»óÀÇ Á¤¼ö
+	// Nodeì˜ ê³ ìœ  ë²ˆí˜¸, 0 ì´ìƒì˜ ì •ìˆ˜
 	int index;
-	// Á÷Á¢ ¿¬°áµÇ¾î ÀÖ´Â NodeÀÇ ¼ö
+	// ì§ì ‘ ì—°ê²°ë˜ì–´ ìˆëŠ” Nodeì˜ ìˆ˜
 	int degree;
-	// Á÷Á¢ ¿¬°áµÇ¾î ÀÖ´Â Nodeµé
+	// ì§ì ‘ ì—°ê²°ë˜ì–´ ìˆëŠ” Nodeë“¤
 	vector<Node*> adjacent;
-	// NodeÀÇ ÇöÀç »óÅÂ¸¦ ÀÇ¹ÌÇÔ
+	// Nodeì˜ í˜„ì¬ ìƒíƒœë¥¼ ì˜ë¯¸í•¨
 	int n_flag;
-	// n_flag¿¡ ´ëÇÑ mutex
+	// n_flagì— ëŒ€í•œ mutex
 	mutex n_flag_mutex;
-	// Node¿¡ ÇÒ´çµÈ »öÀ» ÀÇ¹ÌÇÔ, [0, Node°³¼ö] ¹üÀ§ÀÇ Á¤¼ö
+	// Nodeì— í• ë‹¹ëœ ìƒ‰ì„ ì˜ë¯¸í•¨, [0, Nodeê°œìˆ˜] ë²”ìœ„ì˜ ì •ìˆ˜
 	int color;
-	// Node¿¡ index¹øÂ° »öÀ» ÇÒ´çÇÒ ¼ö ÀÖ´ÂÁö¸¦ ³ªÅ¸³¿
+	// Nodeì— indexë²ˆì§¸ ìƒ‰ì„ í• ë‹¹í•  ìˆ˜ ìˆëŠ”ì§€ë¥¼ ë‚˜íƒ€ëƒ„
 	vector<bool> n_color;
-	// n_color¿¡ ´ëÇÑ mutex
+	// n_colorì— ëŒ€í•œ mutex
 	mutex n_color_mutex;
-
+	// í•´ë‹¹ ë…¸ë“œë¥¼ ì‘ì—…í•  ì“°ë ˆë“œ ë²ˆí˜¸
+	int t_num;
+ 	
+	
 	Node();
 	Node(int index);
 	Node(int index, int num_of_node);

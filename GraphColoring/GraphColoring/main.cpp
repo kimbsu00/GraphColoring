@@ -61,10 +61,71 @@ void coloring() {
 
 }
 
-void selecting(int index) {
-	sort(tcb[index]->task.begin(), tcb[index]->task.end(), Node::compare);
-
-
+void t_work(int t_num) {
+	
+	// init
+	// vector<*Node>* t_task = tcb[t_num]->task; 이렇게 바꿔도 되려나??
+	sort(tcb[t_num]->task.begin(), tcb[t_num]->task.end(), Node::compare);
+	int tmp_flag;
+	
+	// select
+	tcb[t_num]->task[index]->set_n_flag(SELETING);
+	int index=0;
+	bool fin=true;
+	for(index =0; index<tcb[t_num]->task.size(); index++){
+		tmp_flag = tcb[t_num]->task[index]->n_flag; 
+		if(tmp_flag==CAN_SELECT){
+			fin=false;
+			break;
+		}
+		if(tmp_flag==WAIT)
+			fin=false;
+		
+		if(index==(tcb[t_num]->task.size()-1)){
+			if(fin){
+				// 쓰레드 종료
+				tcb[t_num]->set_t_flag(DONE);
+				
+			}else{
+				index = -1;
+			}
+		}
+	}
+	tcb[t_num]->task[index]->set_n_flag(SELECTED);
+	tcb[t_num]->set_t_flag(WAIT);
+	
+	// wait
+	bool check = true;
+	for(int i=0; i<tcb[t_num]->task[index]->adjacent.size();i++){
+		Node* adj = tcb[t_num]->task[index]->adjacent[i];
+		tmp_flag = tcb[adj->t_num]->t_flag;
+			
+		// 여기부분이 쪼금 맘에 안들긴한다.... 아이디어있으면 알려주셈
+		// 해당 쓰레드만 다시 검사할수있는 방법이 있으면 좋을거같긴함,,,
+		while(tmp_flag == SELETING)
+			tmp_flag = tcb[adj->t_num]->t_flag;
+			
+		if(tmp_flag == COLORING){
+			if(adj->n_flag == SELECTED){
+				check = false;
+				break;
+			}
+			if(adj->n_flag == CAN_SELECT){
+				adj->set_n_flag(WAIT);
+				// 문제가능성있음
+				// WAIT으로 바꾸기 이전에 해당 쓰레드가 coloring을 마치고 해당 노드를 선택
+			}
+		}
+	}
+	
+	if(check)
+		// coloring
+	else
+		// select로 복귀
+	
+	
+	
+	
 }
 
 int main(void) {
@@ -80,7 +141,7 @@ int main(void) {
 	graph->distribute_task_to_thread(tcb);
 
 	for (int i = 0; i < threads.size(); i++) {
-		threads[i] = new thread(selecting, i);
+		threads[i] = new thread(t_work, i);
 	}
 
 	for (int i = 0; i < threads.size(); i++) {
