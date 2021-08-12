@@ -123,6 +123,19 @@ void t_work(int t_num) {
 	else
 		// select로 복귀
 	
+	// coloring
+	tcb[t_num]->set_t_flag(COLORING);
+	int tmp_color=0;
+	for(;tmp_color<tcb[t_num].task[index]->n_color.size(); tmp_color++){
+		if(tcb[t_num].task[index]->n_color[tmp_color])
+			break;
+	}
+	tcb[t_num].task[index]->color = tmp_color;
+	for(int i=0; i<tcb[t_num].task[index]->adjacent.size(); i++){
+		tcb[t_num].task[index]->adjacent[i].n_color[tmp_color] = false;
+		// adjacent에서 제거하는방법을 너가 말한대로 배열하나 쓰는게 좋을듯 ㅋㅋ
+		// 
+	}
 	
 	
 	
