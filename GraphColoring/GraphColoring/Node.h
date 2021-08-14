@@ -20,6 +20,8 @@ public:
 	int degree;
 	// 직접 연결되어 있는 Node들
 	vector<Node*> adjacent;
+	// adjacnet의 copy
+	vector<Node*> c_adjacent;
 	// Node의 현재 상태를 의미함
 	int n_flag;
 	// n_flag에 대한 mutex

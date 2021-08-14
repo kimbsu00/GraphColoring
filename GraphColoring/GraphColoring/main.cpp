@@ -57,19 +57,11 @@ bool make_graph() {
 	return true;
 }
 
-void coloring() {
 
-}
-
-void t_work(int t_num) {
+int selecting(int t_num){
+	tcb[t_num]->set_t_flag(SELETING);
 	
-	// init
-	// vector<*Node>* t_task = tcb[t_num]->task; 이렇게 바꿔도 되려나??
-	sort(tcb[t_num]->task.begin(), tcb[t_num]->task.end(), Node::compare);
 	int tmp_flag;
-	
-	// select
-	tcb[t_num]->task[index]->set_n_flag(SELETING);
 	int index=0;
 	bool fin=true;
 	for(index =0; index<tcb[t_num]->task.size(); index++){
@@ -85,60 +77,102 @@ void t_work(int t_num) {
 			if(fin){
 				// 쓰레드 종료
 				tcb[t_num]->set_t_flag(DONE);
-				
+				index = -1;
+				break;
 			}else{
 				index = -1;
 			}
 		}
 	}
+	return index;
+}
+
+int waitting(int t_num, int index){
 	tcb[t_num]->task[index]->set_n_flag(SELECTED);
 	tcb[t_num]->set_t_flag(WAIT);
-	
+	int tmp_flag;
 	// wait
-	bool check = true;
+	int next = COLORING;
 	for(int i=0; i<tcb[t_num]->task[index]->adjacent.size();i++){
 		Node* adj = tcb[t_num]->task[index]->adjacent[i];
 		tmp_flag = tcb[adj->t_num]->t_flag;
 			
 		// 여기부분이 쪼금 맘에 안들긴한다.... 아이디어있으면 알려주셈
 		// 해당 쓰레드만 다시 검사할수있는 방법이 있으면 좋을거같긴함,,,
-		while(tmp_flag == SELETING)
-			tmp_flag = tcb[adj->t_num]->t_flag;
+		if(tmp_flag == SELETING)
+			next = WAIT;
 			
 		if(tmp_flag == COLORING){
 			if(adj->n_flag == SELECTED){
-				check = false;
+				next = SELECTING;
 				break;
 			}
 			if(adj->n_flag == CAN_SELECT){
 				adj->set_n_flag(WAIT);
 				// 문제가능성있음
 				// WAIT으로 바꾸기 이전에 해당 쓰레드가 coloring을 마치고 해당 노드를 선택
+				// 혹은 현재쓰레드가 경쟁에서 밀릴 가능성,,,
 			}
 		}
+		if(i==tcb[t_num]->task[index]->adjacent.size()-1){
+			if(next==WAIT){
+				next==COLORING;
+				i=-1;
+			}
+			else
+				break;
+		}
 	}
-	
-	if(check)
-		// coloring
-	else
-		// select로 복귀
-	
-	// coloring
+	return next;
+}
+
+void coloring() {
 	tcb[t_num]->set_t_flag(COLORING);
 	int tmp_color=0;
 	for(;tmp_color<tcb[t_num].task[index]->n_color.size(); tmp_color++){
 		if(tcb[t_num].task[index]->n_color[tmp_color])
+			tcb[t_num].task[index]->set_n_flag(COLORED);
 			break;
 	}
 	tcb[t_num].task[index]->color = tmp_color;
 	for(int i=0; i<tcb[t_num].task[index]->adjacent.size(); i++){
-		tcb[t_num].task[index]->adjacent[i].n_color[tmp_color] = false;
-		// adjacent에서 제거하는방법을 너가 말한대로 배열하나 쓰는게 좋을듯 ㅋㅋ
-		// 
+		tcb[t_num].task[index]->adjacent[i]->n_color[tmp_color] = false;
+		int j=0;
+		while(1){
+			if(tcb[t_num].task[index]->adjacent[i]->adjacent[j]->index == tcb[t_num].task[index]->adjacent[i]->index){
+				if(tcb[t_num].task[index]->adjacent[i]->adjacent[j]->n_flag==WAIT){
+					tcb[t_num].task[index]->adjacent[i]->adjacent[j]->set_n_flag(CAN_SELECT);
+				}
+					
+				tcb[t_num].task[index]->adjacent[i]->adjacent.erase(tcb[t_num].task[index]->adjacent[i]->adjacent.begin()+j);
+				break;
+			}
+			j++;
+		}
 	}
+}
+
+void t_work(int t_num) {
 	
+	// init
+	// vector<*Node>* t_task = tcb[t_num]->task; 이렇게 바꿔도 되려나??
+	sort(tcb[t_num]->task.begin(), tcb[t_num]->task.end(), Node::compare);
 	
-	
+	while(1){
+		// select
+		int node_index;
+		node_index = selecting(int t_num);
+		if(node_index == -1;){
+			// 쓰레드 종료
+			
+			break;
+		}
+		if(waitting(t_num, node_index)==SELECTING)
+			continue;
+		//if(next==COLORING)
+		coloring(t_num, node_index);
+	}
+
 }
 
 int main(void) {
