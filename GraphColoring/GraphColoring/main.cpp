@@ -79,7 +79,7 @@ int selecting(int t_num){
 				tcb[t_num]->set_t_flag(DONE);
 				index = -1;
 				break;
-			}else{
+			}else{	// 아직 선택할 노드가 남아있으면 처음부터 다시 탐색
 				index = -1;
 			}
 		}
@@ -88,6 +88,8 @@ int selecting(int t_num){
 }
 
 int waitting(int t_num, int index){
+	
+	
 	tcb[t_num]->task[index]->set_n_flag(SELECTED);
 	tcb[t_num]->set_t_flag(WAIT);
 	int tmp_flag;
@@ -127,19 +129,29 @@ int waitting(int t_num, int index){
 }
 
 void coloring() {
+
+	
+	
 	tcb[t_num]->set_t_flag(COLORING);
 	int tmp_color=0;
+	
+	// 선택한 node의 색상칠하는 과정 - n_color에서 가장먼저 true 인 지점의 index를 color값으로 지정
 	for(;tmp_color<tcb[t_num].task[index]->n_color.size(); tmp_color++){
 		if(tcb[t_num].task[index]->n_color[tmp_color])
 			tcb[t_num].task[index]->set_n_flag(COLORED);
 			break;
 	}
 	tcb[t_num].task[index]->color = tmp_color;
+	
+	// 선택한 node의 adjacent들의 n_color 수정 및 adjacent에서 node 제거.
 	for(int i=0; i<tcb[t_num].task[index]->adjacent.size(); i++){
-		tcb[t_num].task[index]->adjacent[i]->n_color[tmp_color] = false;
+		tcb[t_num].task[index]->adjacent[i]->n_color[tmp_color] = false;		// n_color 변경
 		int j=0;
+		
+		// adjacent의 adjacent 에서 선택된 node 제거하는 과정..
 		while(1){
 			if(tcb[t_num].task[index]->adjacent[i]->adjacent[j]->index == tcb[t_num].task[index]->adjacent[i]->index){
+				// 해당 node가 선택된 node 때문에 WAIT이 걸렸을수 있기 때문에 WAIT인경우 풀어준다.
 				if(tcb[t_num].task[index]->adjacent[i]->adjacent[j]->n_flag==WAIT){
 					tcb[t_num].task[index]->adjacent[i]->adjacent[j]->set_n_flag(CAN_SELECT);
 				}
@@ -158,9 +170,13 @@ void t_work(int t_num) {
 	// vector<*Node>* t_task = tcb[t_num]->task; 이렇게 바꿔도 되려나??
 	sort(tcb[t_num]->task.begin(), tcb[t_num]->task.end(), Node::compare);
 	
+	
+	// 각 함수는 t_flag가 변경되는 기준으로 만들어짐
+	// 각 함수에서 n_flag가 변경될때 해당부분에서 문제가 생길가능성이없도록 만들면될듯,,,
+	// 선택된 node가 붙어있는 경우 따로 처리를 안함 추가해야함 원래는 coloring에 넣으려구 했는데, 지금보니까 그냥 wait에서 처리해도 될랑가싶기두하고,,
 	while(1){
 		// select
-		int node_index;
+		int node_index;	// select하고 선택한 node의 index값
 		node_index = selecting(int t_num);
 		if(node_index == -1;){
 			// 쓰레드 종료
