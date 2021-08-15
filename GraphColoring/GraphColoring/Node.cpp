@@ -1,17 +1,17 @@
 #include "Node.h"
 
 Node::Node()
-	: index(-1), degree(0), n_flag(CAN_SELECT), color(-1)
+	: index(-1), degree(0), n_flag(CAN_SELECT), color(-1), t_num(-1)
 {
 }
 
 Node::Node(int index)
-	: index(index), degree(0), n_flag(CAN_SELECT), color(-1)
+	: index(index), degree(0), n_flag(CAN_SELECT), color(-1), t_num(-1)
 {
 }
 
 Node::Node(int index, int num_of_node)
-	: index(index), degree(0), n_flag(CAN_SELECT), color(-1)
+	: index(index), degree(0), n_flag(CAN_SELECT), color(-1), t_num(-1)
 {
 	n_color.resize(num_of_node, true);
 }
