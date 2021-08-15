@@ -33,6 +33,7 @@ void Graph::distribute_task_to_thread(vector<TCB*>& tcb)
 
 	for (int i = 0; i < task.size(); i++) {
 		int index = task[i]->index % mod;
+		task[i]->t_num = index;
 		tcb[index]->task.push_back(task[i]);
 	}
 }
