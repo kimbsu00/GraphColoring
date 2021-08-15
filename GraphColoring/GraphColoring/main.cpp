@@ -114,12 +114,18 @@ int waitting(int t_num, int index){
 				next = T_FLAG::SELECTING;
 				break;
 			}
-			else if (adj->n_flag == N_FLAG::CAN_SELECT) {
-				adj->set_n_flag(N_FLAG::WAIT);
-				// 문제가능성있음
-				// WAIT으로 바꾸기 이전에 해당 쓰레드가 coloring을 마치고 해당 노드를 선택
-				// 혹은 현재쓰레드가 경쟁에서 밀릴 가능성,,,
+			
+			adj->n_flag_mutex.lock();
+			if (adj->n_flag == N_FLAG::CAN_SELECT) {
+				adj->n_flag = N_FLAG::WAIT;
+				/*
+				* 문제가능성있음
+				* WAIT으로 바꾸기 이전에 해당 쓰레드가 coloring을 마치고 해당 노드를 선택
+				* 혹은 현재쓰레드가 경쟁에서 밀릴 가능성,,,
+				* -> 두번째 if 구문 자체를 mutex로 감싸면 문제가 발생하지 않음.
+				*/
 			}
+			adj->n_flag_mutex.unlock();
 		}
 
 		if (i == task->adjacent.size() - 1) {
@@ -143,17 +149,18 @@ void coloring(int t_num, int index) {
 
 	// 선택한 node의 색상칠하는 과정 - n_color에서 가장먼저 true 인 지점의 index를 color값으로 지정
 	for (; tmp_color < task->n_color.size(); tmp_color++) {
-		if (task->n_color[tmp_color])
+		if (task->n_color[tmp_color]) {
 			task->set_n_flag(N_FLAG::COLORED);
 			break;
+		}
 	}
 	task->color = tmp_color;
 	
 	// 선택한 node의 adjacent들의 n_color 수정 및 adjacent에서 node 제거.
 	for (int i = 0; i < task->adjacent.size(); i++) {
 		Node* adj = task->adjacent[i];
-		// n_color 변경
-		adj->n_color[tmp_color] = false;
+		// task를 색칠하는데 사용한 컬러 값을 adjacent에 반영한다.
+		adj->update_n_color(tmp_color);
 
 		int j = 0;
 		// adjacent의 adjacent 에서 선택된 node 제거하는 과정..
