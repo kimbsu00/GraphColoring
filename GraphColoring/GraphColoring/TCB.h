@@ -7,7 +7,7 @@
 using namespace std;
 
 enum T_FLAG {
-	SELETING,
+	SELECTING,
 	WAIT,
 	COLORING,
 	DONE
@@ -29,5 +29,7 @@ public:
 	TCB();
 	TCB(int index);
 	~TCB();
+
+	void set_t_flag(int t_flag);
 };
 

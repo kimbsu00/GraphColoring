@@ -1,12 +1,12 @@
 #include "TCB.h"
 
 TCB::TCB()
-	: index(-1), t_flag(SELETING)
+	: index(-1), t_flag(SELECTING)
 {
 }
 
 TCB::TCB(int index)
-	: index(index), t_flag(SELETING)
+	: index(index), t_flag(SELECTING)
 {
 }
 
