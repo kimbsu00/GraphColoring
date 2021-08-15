@@ -6,16 +6,24 @@
 
 using namespace std;
 
+enum T_FLAG {
+	SELETING,
+	WAIT,
+	COLORING,
+	DONE
+};
+
+
 class TCB
 {
 public:
-	// threadÀÇ °íÀ¯ ¹øÈ£, 0 ÀÌ»óÀÇ Á¤¼ö
+	// threadì˜ ê³ ìœ  ë²ˆí˜¸, 0 ì´ìƒì˜ ì •ìˆ˜
 	int index;
-	// threadÀÇ »óÅÂ¸¦ ÀÇ¹ÌÇÔ
+	// threadì˜ ìƒíƒœë¥¼ ì˜ë¯¸í•¨
 	int t_flag;
-	// t_flag¿¡ ´ëÇÑ mutex
+	// t_flagì— ëŒ€í•œ mutex
 	mutex t_flag_mutex;
-	// thread°¡ »öÄ¥ÇØ¾ß ÇÏ´Â Nodeµé
+	// threadê°€ ìƒ‰ì¹ í•´ì•¼ í•˜ëŠ” Nodeë“¤
 	vector<Node*> task;
 
 	TCB();
