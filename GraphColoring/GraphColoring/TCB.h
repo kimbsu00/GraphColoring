@@ -8,7 +8,7 @@ using namespace std;
 
 enum T_FLAG {
 	SELECTING,
-	WAIT,
+	T_WAIT,
 	COLORING,
 	DONE
 };
@@ -31,5 +31,6 @@ public:
 	~TCB();
 
 	void set_t_flag(int t_flag);
+	int select_task();
 };
 
