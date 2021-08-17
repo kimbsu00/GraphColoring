@@ -5,6 +5,7 @@
 #include <fstream>
 #include <sstream>
 #include <algorithm>
+#include <time.h>
 #include "Graph.h"
 #include "TCB.h"
 
@@ -32,7 +33,7 @@ vector<string> split(string& input, char delimiter) {
 
 bool make_graph() {
 	ifstream ifs;
-	ifs.open("data\\test3.txt");
+	ifs.open("data\\test4.txt");
 
 	if (ifs.fail())			return false;
 	
@@ -58,7 +59,7 @@ bool make_graph() {
 
 bool prove() {
 	ifstream ifs;
-	ifs.open("data\\output3.txt");
+	ifs.open("data\\output4.txt");
 
 	if (ifs.fail())			return false;
 
@@ -110,6 +111,10 @@ int main(void) {
 	}
 	graph->distribute_task_to_thread(tcb);
 
+	clock_t start, end;
+	double time_diff;
+	start = clock(); // 수행 시간 측정 시작
+
 	for (int i = 0; i < threads.size(); i++) {
 		threads[i] = new thread(thread_work, i);
 	}
@@ -117,6 +122,10 @@ int main(void) {
 	for (int i = 0; i < threads.size(); i++) {
 		threads[i]->join();
 	}
+
+	end = clock();
+	time_diff = (double)(end - start);
+	//cout << "running time = " << time_diff << "\n";
 
 	// test code
 	//for (int i = 0; i < graph->task.size(); i++) {
