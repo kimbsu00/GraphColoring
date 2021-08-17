@@ -9,7 +9,7 @@ using namespace std;
 class Graph
 {
 public:
-	// degree를 기준으로 내림차순 정렬되어 있는 Node들의 집합
+	// index를 기준으로 오름차순 정렬되어 있는 Node들의 집합
 	vector<Node*> task;
 
 	Graph();
