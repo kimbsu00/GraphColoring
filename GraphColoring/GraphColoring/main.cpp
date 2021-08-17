@@ -9,7 +9,7 @@
 #include "Graph.h"
 #include "TCB.h"
 
-#define MAX_THREAD_NUM 16
+#define MAX_THREAD_NUM 4
 
 using namespace std;
 
@@ -33,7 +33,7 @@ vector<string> split(string& input, char delimiter) {
 
 bool make_graph() {
 	ifstream ifs;
-	ifs.open("data\\test1.txt");
+	ifs.open("data\\test3.txt");
 
 	if (ifs.fail())			return false;
 	
@@ -57,6 +57,34 @@ bool make_graph() {
 	return true;
 }
 
+bool prove() {
+	ifstream ifs;
+	ifs.open("data\\output3.txt");
+
+	if (ifs.fail())			return false;
+
+	string str;
+	int index = 0;
+	while (getline(ifs, str)) {
+		if (str.empty())			break;
+
+		graph->task[index]->color = stoi(str);
+		index++;
+	}
+
+	bool ret = true;
+	for (int i = 0; i < graph->task.size(); i++) {
+		Node* task = graph->task[i];
+		for (int j = 0; j < task->adjacent.size(); j++) {
+			Node* adj = graph->task[i]->adjacent[j];
+			if (task->color == adj->color) {
+				ret = false;
+				break;
+			}
+		}
+	}
+	return ret;
+}
 
 int selecting(int t_num){
 	tcb[t_num]->set_t_flag(T_FLAG::SELECTING);
@@ -70,7 +98,7 @@ int selecting(int t_num){
 			fin = false;
 			break;
 		}
-		else if (tmp_flag == N_FLAG::WAIT) {
+		else if (tmp_flag == N_FLAG::N_WAIT) {
 			fin = false;
 		}
 		
@@ -90,9 +118,15 @@ int selecting(int t_num){
 	return index;
 }
 
+int selecting_r1(int t_num) {
+	tcb[t_num]->set_t_flag(T_FLAG::SELECTING);
+
+	return tcb[t_num]->select_task();
+}
+
 int waitting(int t_num, int index){
 	tcb[t_num]->task[index]->set_n_flag(N_FLAG::SELECTED);
-	tcb[t_num]->set_t_flag(T_FLAG::WAIT);
+	tcb[t_num]->set_t_flag(T_FLAG::T_WAIT);
 
 	int tmp_flag;
 	// wait
@@ -107,7 +141,7 @@ int waitting(int t_num, int index){
 		// 여기부분이 쪼금 맘에 안들긴한다.... 아이디어있으면 알려주셈
 		// 해당 쓰레드만 다시 검사할수있는 방법이 있으면 좋을거같긴함,,,
 		if (tmp_flag == T_FLAG::SELECTING) {
-			next = T_FLAG::WAIT;
+			next = T_FLAG::T_WAIT;
 		}
 		else if (tmp_flag == T_FLAG::COLORING) {
 			if (adj->n_flag == N_FLAG::SELECTED) {
@@ -117,7 +151,7 @@ int waitting(int t_num, int index){
 			
 			adj->n_flag_mutex.lock();
 			if (adj->n_flag == N_FLAG::CAN_SELECT) {
-				adj->n_flag = N_FLAG::WAIT;
+				adj->n_flag = N_FLAG::N_WAIT;
 				/*
 				* 문제가능성있음
 				* WAIT으로 바꾸기 이전에 해당 쓰레드가 coloring을 마치고 해당 노드를 선택
@@ -129,7 +163,7 @@ int waitting(int t_num, int index){
 		}
 
 		if (i == task->adjacent.size() - 1) {
-			if (next == T_FLAG::WAIT) {
+			if (next == T_FLAG::T_WAIT) {
 				next = T_FLAG::COLORING;
 				i = -1;
 			}
@@ -139,6 +173,15 @@ int waitting(int t_num, int index){
 		}
 	}
 	return next;
+}
+
+bool waiting_r1(int t_num, int index) {
+	tcb[t_num]->set_t_flag(T_FLAG::T_WAIT);
+	//tcb[t_num]->task[index]->set_n_flag(N_FLAG::SELECTED);
+
+	Node* task = tcb[t_num]->task[index];
+
+	return task->check_adjacent();
 }
 
 void coloring(int t_num, int index) {
@@ -168,7 +211,7 @@ void coloring(int t_num, int index) {
 			// 이 부분 살짝 이상한데?
 			if (adj->adjacent[j]->index == adj->index) {
 				// 해당 node가 선택된 node 때문에 WAIT이 걸렸을수 있기 때문에 WAIT인경우 풀어준다.
-				if (adj->adjacent[j]->n_flag == N_FLAG::WAIT) {
+				if (adj->adjacent[j]->n_flag == N_FLAG::N_WAIT) {
 					adj->adjacent[j]->set_n_flag(N_FLAG::CAN_SELECT);
 				}
 					
@@ -178,6 +221,14 @@ void coloring(int t_num, int index) {
 			j++;
 		}
 	}
+}
+
+void coloring_r1(int t_num, int index) {
+	tcb[t_num]->set_t_flag(T_FLAG::COLORING);
+
+	Node* task = tcb[t_num]->task[index];
+
+	return task->coloring();
 }
 
 void t_work(int t_num) {
@@ -198,11 +249,26 @@ void t_work(int t_num) {
 	}
 }
 
+void t_work_r1(int t_num) {
+	sort(tcb[t_num]->task.begin(), tcb[t_num]->task.end(), Node::compare);
+
+	while (true) {
+		int node_index = selecting(t_num);
+		if (node_index == -1)			break;
+
+		if (waiting_r1(t_num, node_index)) {
+			coloring_r1(t_num, node_index);
+		}
+	}
+}
+
 int main(void) {
 	if (!make_graph()) {
 		cout << "test file is not open.\n";
 		return 0;
 	}
+	
+	//bool prove_ret = prove();
 
 	vector<thread*> threads(MAX_THREAD_NUM, nullptr);
 	for (int i = 0; i < threads.size(); i++) {
@@ -211,7 +277,7 @@ int main(void) {
 	graph->distribute_task_to_thread(tcb);
 
 	for (int i = 0; i < threads.size(); i++) {
-		threads[i] = new thread(t_work, i);
+		threads[i] = new thread(t_work_r1, i);
 	}
 
 	for (int i = 0; i < threads.size(); i++) {
@@ -219,12 +285,10 @@ int main(void) {
 	}
 
 	// test code
-	for (int i = 0; i < tcb.size(); i++) {
-		cout << "\n\nTCB #" << i << "\n";
-		for (int j = 0; j < tcb[i]->task.size(); j++) {
-			cout << tcb[i]->task[j]->degree << "\n";
-		}
-	}
+	//for (int i = 0; i < graph->task.size(); i++) {
+	//	//cout << "\n\nNode #" << graph->task[i]->index << "\n";
+	//	cout << graph->task[i]->color << "\n";
+	//}
 
 	return 0;
 }
