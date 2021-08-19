@@ -31,62 +31,35 @@ vector<string> split(string& input, char delimiter) {
 	return answer;
 }
 
-bool make_graph(int data_index) {
-	string fileName = "data\\input\\test";
-	fileName.append(to_string(data_index));
-	fileName.append(".txt");
-
+bool make_graph() {
 	ifstream ifs;
-	ifs.open(fileName);
+	ifs.open("data\\test4.txt");
 
 	if (ifs.fail())			return false;
 	
 	string str;
 	getline(ifs, str);
-	vector<string> temp;
+	vector<string> temp = split(str, ' ');
+	int num_of_node = stoi(temp[2]);
+	int num_of_edge = stoi(temp[3]);
+
+	graph = new Graph(num_of_node);
 
 	while (getline(ifs, str)) {
 		if (str.empty())			break;
 
 		temp = split(str, ' ');
-		if (temp[0].compare("p") == 0) {
-			int num_of_node = stoi(temp[2]);
-			int num_of_edge = stoi(temp[3]);
-			graph = new Graph(num_of_node);
-		}
-		else if (temp[0].compare("e") == 0) {
-			int p = stoi(temp[1]) - 1;
-			int q = stoi(temp[2]) - 1;
-			graph->insert(p, q);
-		}
+		int p = stoi(temp[1]) - 1;
+		int q = stoi(temp[2]) - 1;
+		graph->insert(p, q);
 	}
 
 	return true;
 }
 
-void make_output(int data_index) {
-	string fileName = "data\\output\\output";
-	fileName.append(to_string(data_index));
-	fileName.append(".txt");
-
-	ofstream writeFile;
-	writeFile.open(fileName);
-
-	for (int i = 0; i < graph->task.size(); i++) {
-		string str = to_string(graph->task[i]->color);
-		str.append(1, '\n');
-		writeFile.write(str.c_str(), str.size());
-	}
-	writeFile.close();
-}
-
-bool prove(int data_index) {
-	string fileName = "data\\output\\output";
-	fileName.append(to_string(data_index));
-	fileName.append(".txt");
-
+bool prove() {
 	ifstream ifs;
-	ifs.open(fileName);
+	ifs.open("data\\output4.txt");
 
 	if (ifs.fail())			return false;
 
@@ -125,19 +98,12 @@ void thread_work(int thread_idx) {
 }
 
 int main(void) {
-	/*
-	* range of data_index is [1, 22].
-	* input: "test{data_indext}.txt"
-	* output: "output{data_index}.txt"
-	*/
-	const int data_index = 22;
-
-	if (!make_graph(data_index)) {
+	if (!make_graph()) {
 		cout << "test file is not open.\n";
 		return 0;
 	}
 	
-	//bool prove_ret = prove(data_index);
+	//bool prove_ret = prove();
 
 	vector<thread*> threads(MAX_THREAD_NUM, nullptr);
 	for (int i = 0; i < threads.size(); i++) {
@@ -159,9 +125,7 @@ int main(void) {
 
 	end = clock();
 	time_diff = (double)(end - start);
-	cout << "running time = " << time_diff << "ms\n";
-
-	make_output(data_index);
+	//cout << "running time = " << time_diff << "\n";
 
 	// test code
 	//for (int i = 0; i < graph->task.size(); i++) {
