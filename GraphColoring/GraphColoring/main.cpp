@@ -124,14 +124,15 @@ void thread_work(int thread_idx) {
 }
 
 int main(void) {
-	const int data_index = 22;
+	/*
+	* range of data_index is [1, 22].
+	*/
+	const int data_index = 1;
 
 	if (!make_graph(data_index)) {
 		cout << "test file is not open.\n";
 		return 0;
 	}
-	
-	//bool prove_ret = prove(data_index);
 
 	vector<thread*> threads(MAX_THREAD_NUM, nullptr);
 	for (int i = 0; i < threads.size(); i++) {
@@ -157,11 +158,8 @@ int main(void) {
 
 	make_output(data_index);
 
-	// test code
-	//for (int i = 0; i < graph->task.size(); i++) {
-	//	//cout << "\n\nNode #" << graph->task[i]->index << "\n";
-	//	cout << graph->task[i]->color << "\n";
-	//}
+	bool prove_ret = prove(data_index);
+	cout << "prove value = " << (prove_ret ? "true" : "false") << "\n";
 
 	return 0;
 }
