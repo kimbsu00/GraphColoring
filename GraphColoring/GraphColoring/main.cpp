@@ -153,7 +153,7 @@ int main(void) {
 
 	end = clock();
 	time_diff = (double)(end - start);
-	cout << "running time = " << time_diff << "\n";
+	cout << "running time = " << time_diff << "ms\n";
 
 	make_output(data_index);
 
