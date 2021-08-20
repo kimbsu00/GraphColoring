@@ -42,6 +42,7 @@ public:
 	* 그렇지 않으면 return false
 	*/
 	bool is_priority();
+
 	/*
 	* Node를 색칠하고, 색칠한 결과를 인접한 Node에 반영한다.
 	*/

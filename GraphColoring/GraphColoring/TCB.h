@@ -17,6 +17,11 @@ public:
 	TCB(int index);
 	~TCB();
 
+	/*
+	* task 배열에 존재하는 Node들 중에서,
+	* thread가 색칠할 Node를 선택하고,
+	* 선택한 Node의 index를 리턴한다.
+	*/
 	int select_task();
 };
 
