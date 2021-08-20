@@ -1,17 +1,17 @@
 #include "Node.h"
 
 Node::Node()
-	: index(-1), degree(0), n_flag(CAN_SELECT), color(-1), t_num(-1)
+	: index(-1), degree(0), n_flag(UNCOLORED), color(-1)
 {
 }
 
 Node::Node(int index)
-	: index(index), degree(0), n_flag(CAN_SELECT), color(-1), t_num(-1)
+	: index(index), degree(0), n_flag(UNCOLORED), color(-1)
 {
 }
 
 Node::Node(int index, int num_of_node)
-	: index(index), degree(0), n_flag(CAN_SELECT), color(-1), t_num(-1)
+	: index(index), degree(0), n_flag(UNCOLORED), color(-1)
 {
 	n_color.resize(num_of_node, true);
 }
@@ -22,53 +22,20 @@ Node::~Node()
 
 bool Node::compare(const Node* a, const Node* b)
 {
+	if (a->degree == b->degree)
+		return a->index < b->index;
 	return a->degree > b->degree;
 }
 
-bool Node::check()
-{
-	for (int i = 0; i < adjacent.size(); i++) {
-		if (adjacent[i]->n_flag == SELECTED) {
-			return false;
-		}
-	}
-	return true;
-}
-
-void Node::set_n_flag(int n_flag)
-{
-	this->n_flag_mutex.lock();
-	this->n_flag = n_flag;
-	this->n_flag_mutex.unlock();
-}
-
-void Node::update_n_color(int already_used_color)
-{
-	this->n_color_mutex.lock();
-	this->n_color[already_used_color] = false;
-	this->n_color_mutex.unlock();
-}
-
-bool Node::check_adjacent()
+bool Node::is_priority()
 {
 	bool ret = true;
-	restore_index.clear();
 
 	for (int i = 0; i < adjacent.size(); i++) {
-		if (adjacent[i]->n_flag == N_FLAG::SELECTED) {
-			for (int j = 0; j < restore_index.size(); j++) {
-				adjacent[i]->set_n_flag(N_FLAG::CAN_SELECT);
-			}
+		if (!compare(this, adjacent[i])) {
 			ret = false;
 			break;
 		}
-		
-		adjacent[i]->n_flag_mutex.lock();
-		if (adjacent[i]->n_flag == N_FLAG::CAN_SELECT) {
-			adjacent[i]->n_flag = N_FLAG::N_WAIT;
-			restore_index.push_back(i);
-		}
-		adjacent[i]->n_flag_mutex.unlock();
 	}
 
 	return ret;
@@ -77,21 +44,33 @@ bool Node::check_adjacent()
 void Node::coloring()
 {
 	int color = 0;
-	n_color_mutex.lock();
 	for (; color < n_color.size(); color++) {
 		if (n_color[color]) {
 			this->color = color;
 			break;
 		}
 	}
-	n_color_mutex.unlock();
-	set_n_flag(N_FLAG::COLORED);
 
 	for (int i = 0; i < adjacent.size(); i++) {
-		adjacent[i]->update_n_color(color);
+		adjacent[i]->n_color_mutex.lock();
+		adjacent[i]->n_color[color] = false;
+		adjacent[i]->n_color_mutex.unlock();
+
+		adjacent[i]->degree_mutex.lock();
+		if (adjacent[i]->n_flag == N_FLAG::UNCOLORED) {
+			adjacent[i]->degree -= 1;
+		}
+		adjacent[i]->degree_mutex.unlock();
 	}
 
-	for (int i = 0; i < restore_index.size(); i++) {
-		adjacent[restore_index[i]]->set_n_flag(N_FLAG::CAN_SELECT);
-	}
+	/*
+	* this->degree를 adjacent[i]->degree보다 먼저 변경할 경우,
+	* 인접한 두 노드가 서로 같은 색이 될 수 있다.
+	*/ 
+	this->degree_mutex.lock();
+	this->degree = -1;
+	this->degree_mutex.unlock();
+
+	this->n_flag = N_FLAG::COLORED;
 }
+
