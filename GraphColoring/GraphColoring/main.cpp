@@ -5,7 +5,7 @@
 #include <fstream>
 #include <sstream>
 #include <algorithm>
-#include <time.h>
+#include <windows.h>
 #include "Graph.h"
 #include "TCB.h"
 
@@ -127,7 +127,7 @@ int main(void) {
 	/*
 	* range of data_index is [1, 22].
 	*/
-	const int data_index = 1;
+	const int data_index = 21;
 
 	if (!make_graph(data_index)) {
 		cout << "test file is not open.\n";
@@ -140,9 +140,7 @@ int main(void) {
 	}
 	graph->distribute_task_to_thread(tcb);
 
-	clock_t start, end;
-	double time_diff;
-	start = clock(); // 수행 시간 측정 시작
+	ULONGLONG dw_start = GetTickCount64();
 
 	for (int i = 0; i < threads.size(); i++) {
 		threads[i] = new thread(thread_work, i);
@@ -152,9 +150,7 @@ int main(void) {
 		threads[i]->join();
 	}
 
-	end = clock();
-	time_diff = (double)(end - start);
-	cout << "running time = " << time_diff << "ms\n";
+	cout << GetTickCount64() - dw_start << " millisecond\n";
 
 	make_output(data_index);
 
