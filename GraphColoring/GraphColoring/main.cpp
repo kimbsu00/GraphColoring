@@ -1,15 +1,15 @@
 #include <iostream>
 #include <vector>
-#include <thread>
 #include <string>
 #include <fstream>
 #include <sstream>
 #include <algorithm>
-#include <time.h>
+#include <omp.h>
+#include <windows.h>
 #include "Graph.h"
 #include "TCB.h"
 
-#define MAX_THREAD_NUM 4
+#define MAX_THREAD_NUM 8
 
 using namespace std;
 
@@ -113,13 +113,19 @@ bool prove(int data_index) {
 }
 
 void thread_work(int thread_idx) {
+	TCB* m_tcb;
+	#pragma omp critical 
+	 m_tcb = tcb[thread_idx];
+
 	// thread 별로 가지고 있는 task를 degree 기준으로 내림차순 정렬함.
-	sort(tcb[thread_idx]->task.begin(), tcb[thread_idx]->task.end(), Node::compare);
+	sort(m_tcb->task.begin(), m_tcb->task.end(), Node::compare);
 
 	int node_idx = -1;
-	while ((node_idx = tcb[thread_idx]->select_task()) != -1) {
-		Node* node = tcb[thread_idx]->task[node_idx];
+	while ((node_idx = m_tcb->select_task()) != -1) {
+		Node* node = m_tcb->task[node_idx];
 		node->coloring();
+		#pragma omp critical
+		cout << "node_idx is " << node_idx << "\n";
 	}
 }
 
@@ -127,7 +133,7 @@ int main(void) {
 	/*
 	* range of data_index is [1, 22].
 	*/
-	const int data_index = 1;
+	const int data_index = 15;
 
 	if (!make_graph(data_index)) {
 		cout << "test file is not open.\n";
@@ -140,21 +146,16 @@ int main(void) {
 	}
 	graph->distribute_task_to_thread(tcb);
 
-	clock_t start, end;
-	double time_diff;
-	start = clock(); // 수행 시간 측정 시작
+	ULONGLONG dw_start = GetTickCount64();
 
-	for (int i = 0; i < threads.size(); i++) {
-		threads[i] = new thread(thread_work, i);
+	#pragma omp parallel 
+	{
+		int thread_idx = omp_get_thread_num();
+		thread_work(thread_idx);
 	}
 
-	for (int i = 0; i < threads.size(); i++) {
-		threads[i]->join();
-	}
-
-	end = clock();
-	time_diff = (double)(end - start);
-	cout << "running time = " << time_diff << "ms\n";
+	#pragma omp barrier
+	cout << GetTickCount64() - dw_start << " millisecond\n";
 
 	make_output(data_index);
 
