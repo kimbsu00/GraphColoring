@@ -124,8 +124,6 @@ void thread_work(int thread_idx) {
 	while ((node_idx = m_tcb->select_task()) != -1) {
 		Node* node = m_tcb->task[node_idx];
 		node->coloring();
-		#pragma omp critical
-		cout << "node_idx is " << node_idx << "\n";
 	}
 }
 
@@ -133,7 +131,7 @@ int main(void) {
 	/*
 	* range of data_index is [1, 22].
 	*/
-	const int data_index = 15;
+	const int data_index = 17;
 
 	if (!make_graph(data_index)) {
 		cout << "test file is not open.\n";
