@@ -60,18 +60,14 @@ void Node::coloring()
 	}
 
 	for (int i = 0; i < adjacent.size(); i++) {
-		omp_set_lock(&n_color_lock);
-		//adjacent[i]->n_color_mutex.lock();
+		omp_set_lock(&(adjacent[i]->n_color_lock));
 		adjacent[i]->n_color[color] = false;
-		//adjacent[i]->n_color_mutex.unlock();
-		omp_unset_lock(&n_color_lock);
+		omp_unset_lock(&(adjacent[i]->n_color_lock));
 
 		omp_set_lock(&(adjacent[i]->degree_lock));
-		//adjacent[i]->degree_mutex.lock();
 		if (adjacent[i]->n_flag == N_FLAG::UNCOLORED) {
 			adjacent[i]->degree -= 1;
 		}
-		//adjacent[i]->degree_mutex.unlock();
 		omp_unset_lock(&(adjacent[i]->degree_lock));
 	}
 
