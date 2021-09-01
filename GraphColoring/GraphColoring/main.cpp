@@ -6,6 +6,7 @@
 #include <sstream>
 #include <algorithm>
 #include <windows.h>
+#include <ctime>
 #include "Graph.h"
 #include "TCB.h"
 
@@ -127,7 +128,7 @@ int main(void) {
 	/*
 	* range of data_index is [1, 22].
 	*/
-	const int data_index = 21;
+	const int data_index = 17;
 
 	if (!make_graph(data_index)) {
 		cout << "test file is not open.\n";
@@ -140,7 +141,8 @@ int main(void) {
 	}
 	graph->distribute_task_to_thread(tcb);
 
-	ULONGLONG dw_start = GetTickCount64();
+	//ULONGLONG dw_start = GetTickCount64();
+	clock_t start_time = clock();
 
 	for (int i = 0; i < threads.size(); i++) {
 		threads[i] = new thread(thread_work, i);
@@ -150,7 +152,9 @@ int main(void) {
 		threads[i]->join();
 	}
 
-	cout << GetTickCount64() - dw_start << " millisecond\n";
+	clock_t end_time = clock();
+	cout << end_time - start_time << "ms\n";
+	//cout << GetTickCount64() - dw_start << " millisecond\n";
 
 	make_output(data_index);
 
