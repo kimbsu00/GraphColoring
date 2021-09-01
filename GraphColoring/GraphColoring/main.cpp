@@ -113,6 +113,8 @@ bool prove(int data_index) {
 }
 
 void thread_work(int thread_idx) {
+	ULONGLONG thread_start = GetTickCount64();
+
 	TCB* m_tcb;
 	#pragma omp critical 
 	 m_tcb = tcb[thread_idx];
@@ -125,6 +127,10 @@ void thread_work(int thread_idx) {
 		Node* node = m_tcb->task[node_idx];
 		node->coloring();
 	}
+
+	ULONGLONG running_time = GetTickCount64() - thread_start;
+	#pragma omp critical
+	cout << "thread_idx is " << thread_idx << " and time is " << running_time << " millisecond\n";
 }
 
 int main(void) {
