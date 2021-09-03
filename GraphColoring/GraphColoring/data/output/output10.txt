@@ -77,3 +77,4 @@
 2
 2
 0
+used color num : 4

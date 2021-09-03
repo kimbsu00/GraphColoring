@@ -210,3 +210,4 @@
 1
 2
 3
+used color num : 6

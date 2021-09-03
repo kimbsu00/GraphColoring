@@ -112,3 +112,4 @@
 3
 4
 5
+used color num : 7

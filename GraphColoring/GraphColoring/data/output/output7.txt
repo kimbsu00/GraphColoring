@@ -78,3 +78,4 @@
 2
 3
 4
+used color num : 6

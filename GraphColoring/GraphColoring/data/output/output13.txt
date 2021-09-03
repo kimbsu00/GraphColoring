@@ -123,3 +123,4 @@
 2
 22
 6
+used color num : 23

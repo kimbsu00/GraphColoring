@@ -248,3 +248,4 @@
 86
 90
 42
+used color num : 92

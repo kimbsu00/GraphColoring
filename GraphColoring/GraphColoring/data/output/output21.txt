@@ -1214,3 +1214,4 @@
 2
 0
 1
+used color num : 7

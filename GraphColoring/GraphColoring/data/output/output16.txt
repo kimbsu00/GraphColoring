@@ -498,3 +498,4 @@
 7
 6
 11
+used color num : 13

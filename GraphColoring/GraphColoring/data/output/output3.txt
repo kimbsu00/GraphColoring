@@ -65,3 +65,4 @@
 2
 1
 0
+used color num : 5

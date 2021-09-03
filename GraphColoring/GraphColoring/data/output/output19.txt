@@ -136,3 +136,4 @@
 6
 0
 5
+used color num : 11

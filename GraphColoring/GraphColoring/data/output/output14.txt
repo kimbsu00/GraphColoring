@@ -123,3 +123,4 @@
 35
 41
 50
+used color num : 57
