@@ -5,7 +5,8 @@
 #include <sstream>
 #include <algorithm>
 #include <omp.h>
-#include <windows.h>
+#include <ctime>
+#include <set>
 #include "Graph.h"
 #include "TCB.h"
 
@@ -76,6 +77,10 @@ void make_output(int data_index) {
 		str.append(1, '\n');
 		ofs.write(str.c_str(), str.size());
 	}
+	string str = "used color num : ";
+	str.append(to_string(graph->color_num));
+	str.append(1, '\n');
+	ofs.write(str.c_str(), str.size());
 	ofs.close();
 }
 
@@ -93,14 +98,17 @@ bool prove(int data_index) {
 	int index = 0;
 	while (getline(ifs, str)) {
 		if (str.empty())			break;
+		if (str[0] == 'u')			break;
 
 		graph->task[index]->color = stoi(str);
 		index++;
 	}
 
+	set<int> colors;
 	bool ret = true;
 	for (int i = 0; i < graph->task.size(); i++) {
 		Node* task = graph->task[i];
+		colors.insert(task->color);
 		for (int j = 0; j < task->adjacent.size(); j++) {
 			Node* adj = graph->task[i]->adjacent[j];
 			if (task->color == adj->color) {
@@ -109,11 +117,13 @@ bool prove(int data_index) {
 			}
 		}
 	}
+	graph->color_num = colors.size();
+
 	return ret;
 }
 
 void thread_work(int thread_idx) {
-	ULONGLONG thread_start = GetTickCount64();
+	clock_t thread_start = clock();
 
 	TCB* m_tcb;
 	#pragma omp critical 
@@ -125,19 +135,20 @@ void thread_work(int thread_idx) {
 	int node_idx = -1;
 	while ((node_idx = m_tcb->select_task()) != -1) {
 		Node* node = m_tcb->task[node_idx];
-		node->coloring();
+		m_tcb->coloring_ref_count += node->coloring();
 	}
 
-	ULONGLONG running_time = GetTickCount64() - thread_start;
+	clock_t thread_end = clock();
+	m_tcb->running_time = thread_end - thread_start;
 	#pragma omp critical
-	cout << "thread_idx is " << thread_idx << " and time is " << running_time << " millisecond\n";
+	cout << "thread_idx is " << thread_idx << " and time is " << m_tcb->running_time << " ms\n";
 }
 
 int main(void) {
 	/*
 	* range of data_index is [1, 22].
 	*/
-	const int data_index = 17;
+	const int data_index = 1;
 
 	if (!make_graph(data_index)) {
 		cout << "test file is not open.\n";
@@ -150,7 +161,7 @@ int main(void) {
 	}
 	graph->distribute_task_to_thread(tcb);
 
-	ULONGLONG dw_start = GetTickCount64();
+	clock_t start_time = clock();
 
 	#pragma omp parallel 
 	{
@@ -159,12 +170,13 @@ int main(void) {
 	}
 
 	#pragma omp barrier
-	cout << GetTickCount64() - dw_start << " millisecond\n";
-
-	make_output(data_index);
+	clock_t end_time = clock();
+	cout << end_time - start_time << "ms\n";
 
 	bool prove_ret = prove(data_index);
 	cout << "prove value = " << (prove_ret ? "true" : "false") << "\n";
+
+	make_output(data_index);
 
 	return 0;
 }
