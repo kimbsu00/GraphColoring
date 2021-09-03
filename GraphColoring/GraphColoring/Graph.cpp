@@ -1,10 +1,12 @@
 #include "Graph.h"
 
 Graph::Graph()
+	: color_num(0)
 {
 }
 
 Graph::Graph(int num_of_node)
+	: color_num(0)
 {
 	for (int i = 0; i < num_of_node; i++) {
 		task.push_back(new Node(i, num_of_node));

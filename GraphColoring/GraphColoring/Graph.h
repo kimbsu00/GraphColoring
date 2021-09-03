@@ -11,6 +11,8 @@ class Graph
 public:
 	// index를 기준으로 오름차순 정렬되어 있는 Node들의 집합
 	vector<Node*> task;
+	// Graph를 색칠하는데 사용된 컬러 값의 개수
+	int color_num;
 
 	Graph();
 	Graph(int num_of_node);
