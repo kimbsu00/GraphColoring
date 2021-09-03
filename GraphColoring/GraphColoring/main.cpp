@@ -5,7 +5,7 @@
 #include <sstream>
 #include <algorithm>
 #include <omp.h>
-#include <windows.h>
+#include <ctime>
 #include "Graph.h"
 #include "TCB.h"
 
@@ -113,24 +113,28 @@ bool prove(int data_index) {
 }
 
 void thread_work(int thread_idx) {
-	ULONGLONG thread_start = GetTickCount64();
+	clock_t thread_start = clock();
 
 	TCB* m_tcb;
 	#pragma omp critical 
 	 m_tcb = tcb[thread_idx];
 
-	// thread 별로 가지고 있는 task를 degree 기준으로 내림차순 정렬함.
+	// thread 별로 가지고 있는 task를 degree 기준으로 오름차순 정렬함.
 	sort(m_tcb->task.begin(), m_tcb->task.end(), Node::compare);
 
 	int node_idx = -1;
 	while ((node_idx = m_tcb->select_task()) != -1) {
 		Node* node = m_tcb->task[node_idx];
-		node->coloring();
+		m_tcb->coloring_ref_count += node->coloring();
 	}
 
-	ULONGLONG running_time = GetTickCount64() - thread_start;
+	clock_t thread_end = clock();
 	#pragma omp critical
-	cout << "thread_idx is " << thread_idx << " and time is " << running_time << " millisecond\n";
+	{
+		cout << "thread_idx is " << thread_idx << " and time is " << thread_end - thread_start << " millisecond\n";
+		cout << "thread_idx is " << thread_idx << " and select_ref_count is " << m_tcb->select_ref_count << "\n";
+		cout << "thread_idx is " << thread_idx << " and coloring_ref_count is " << m_tcb->coloring_ref_count << "\n";
+	}
 }
 
 int main(void) {
@@ -150,7 +154,7 @@ int main(void) {
 	}
 	graph->distribute_task_to_thread(tcb);
 
-	ULONGLONG dw_start = GetTickCount64();
+	clock_t start_time = clock();
 
 	#pragma omp parallel 
 	{
@@ -159,7 +163,8 @@ int main(void) {
 	}
 
 	#pragma omp barrier
-	cout << GetTickCount64() - dw_start << " millisecond\n";
+	clock_t end_time = clock();
+	cout << end_time - start_time << "ms\n";
 
 	make_output(data_index);
 

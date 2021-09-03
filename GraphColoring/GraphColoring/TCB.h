@@ -13,6 +13,9 @@ public:
 	// thread가 색칠해야 하는 Node들
 	vector<Node*> task;
 
+	long long select_ref_count;
+	long long coloring_ref_count;
+
 	TCB();
 	TCB(int index);
 	~TCB();

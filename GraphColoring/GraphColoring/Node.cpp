@@ -32,7 +32,7 @@ bool Node::compare(const Node* a, const Node* b)
 {
 	if (a->degree == b->degree)
 		return a->index < b->index;
-	return a->degree > b->degree;
+	return a->degree < b->degree;
 }
 
 bool Node::is_priority()
@@ -49,7 +49,7 @@ bool Node::is_priority()
 	return ret;
 }
 
-void Node::coloring()
+long long Node::coloring()
 {
 	int color = 0;
 	for (; color < n_color.size(); color++) {
@@ -76,11 +76,11 @@ void Node::coloring()
 	* 인접한 두 노드가 서로 같은 색이 될 수 있다.
 	*/ 
 	omp_set_lock(&degree_lock);
-	//this->degree_mutex.lock();
-	this->degree = -1;
-	//this->degree_mutex.unlock();
+	this->degree = 1987654321;
 	omp_unset_lock(&degree_lock);
 
 	this->n_flag = N_FLAG::COLORED;
+
+	return adjacent.size();
 }
 
