@@ -65,6 +65,12 @@ bool make_graph(int data_index) {
 }
 
 void make_output(int data_index) {
+	set<int> colors;
+	for (int i = 0; i < graph->task.size(); i++) {
+		colors.insert(graph->task[i]->color);
+	}
+	graph->color_num = colors.size();
+
 	string fileName = "data\\output\\output";
 	fileName.append(to_string(data_index));
 	fileName.append(".txt");
@@ -104,11 +110,9 @@ bool prove(int data_index) {
 		index++;
 	}
 
-	set<int> colors;
 	bool ret = true;
 	for (int i = 0; i < graph->task.size(); i++) {
 		Node* task = graph->task[i];
-		colors.insert(task->color);
 		for (int j = 0; j < task->adjacent.size(); j++) {
 			Node* adj = graph->task[i]->adjacent[j];
 			if (task->color == adj->color) {
@@ -117,7 +121,6 @@ bool prove(int data_index) {
 			}
 		}
 	}
-	graph->color_num = colors.size();
 
 	return ret;
 }
@@ -155,8 +158,7 @@ int main(void) {
 		return 0;
 	}
 
-	vector<thread*> threads(MAX_THREAD_NUM, nullptr);
-	for (int i = 0; i < threads.size(); i++) {
+	for (int i = 0; i < MAX_THREAD_NUM; i++) {
 		tcb.push_back(new TCB(i));
 	}
 	graph->distribute_task_to_thread(tcb);
@@ -173,10 +175,10 @@ int main(void) {
 	clock_t end_time = clock();
 	cout << end_time - start_time << "ms\n";
 
+	make_output(data_index);
+
 	bool prove_ret = prove(data_index);
 	cout << "prove value = " << (prove_ret ? "true" : "false") << "\n";
-
-	make_output(data_index);
 
 	return 0;
 }
