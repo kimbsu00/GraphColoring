@@ -10,7 +10,7 @@
 #include "Graph.h"
 #include "TCB.h"
 
-#define MAX_THREAD_NUM 16
+#define MAX_THREAD_NUM 8
 
 using namespace std;
 
