@@ -10,7 +10,7 @@
 #include "Graph.h"
 #include "TCB.h"
 
-#define MAX_THREAD_NUM 8
+#define MAX_THREAD_NUM 16
 
 using namespace std;
 
@@ -151,12 +151,13 @@ int main(void) {
 	/*
 	* range of data_index is [1, 22].
 	*/
-	const int data_index = 1;
+	const int data_index = 17;
 
 	if (!make_graph(data_index)) {
 		cout << "test file is not open.\n";
 		return 0;
 	}
+	//bool prove_ret = prove(data_index);
 
 	for (int i = 0; i < MAX_THREAD_NUM; i++) {
 		tcb.push_back(new TCB(i));
@@ -165,7 +166,7 @@ int main(void) {
 
 	clock_t start_time = clock();
 
-	#pragma omp parallel 
+	#pragma omp parallel num_threads(MAX_THREAD_NUM)
 	{
 		int thread_idx = omp_get_thread_num();
 		thread_work(thread_idx);
