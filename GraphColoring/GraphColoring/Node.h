@@ -17,8 +17,6 @@ public:
 	int index;
 	// 직접 연결되어 있는 Node의 수
 	int degree;
-	// degree에 대한 lock
-	omp_lock_t degree_lock;
 	// 직접 연결되어 있는 Node들
 	vector<Node*> adjacent;
 	// Node의 현재 상태를 의미함
