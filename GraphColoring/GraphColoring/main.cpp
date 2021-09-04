@@ -138,7 +138,7 @@ void thread_work(int thread_idx) {
 	int node_idx = -1;
 	while ((node_idx = m_tcb->select_task()) != -1) {
 		Node* node = m_tcb->task[node_idx];
-		m_tcb->coloring_ref_count += node->coloring();
+		m_tcb->coloring_ref_count += node->coloring(); 
 	}
 
 	clock_t thread_end = clock();
