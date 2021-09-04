@@ -3,28 +3,24 @@
 Node::Node()
 	: index(-1), degree(0), n_flag(UNCOLORED), color(-1)
 {
-	omp_init_lock(&degree_lock);
 	omp_init_lock(&n_color_lock);
 }
 
 Node::Node(int index)
 	: index(index), degree(0), n_flag(UNCOLORED), color(-1)
 {
-	omp_init_lock(&degree_lock);
 	omp_init_lock(&n_color_lock);
 }
 
 Node::Node(int index, int num_of_node)
 	: index(index), degree(0), n_flag(UNCOLORED), color(-1)
 {
-	omp_init_lock(&degree_lock);
 	omp_init_lock(&n_color_lock);
 	n_color.resize(num_of_node, true);
 }
 
 Node::~Node()
 {
-	omp_destroy_lock(&degree_lock);
 	omp_destroy_lock(&n_color_lock);
 }
 
@@ -38,23 +34,13 @@ bool Node::compare(const Node* a, const Node* b)
 bool Node::is_priority()
 {
 	bool ret = true;
-	
-	if (omp_test_lock(&this->degree_lock) == 0)			return false;
 
 	for (int i = 0; i < adjacent.size(); i++) {
-		if (omp_test_lock(&adjacent[i]->degree_lock) == 0) {
-			ret = false;
-			break;
-		}
-
 		if (!compare(this, adjacent[i])) {
 			ret = false;
-			omp_unset_lock(&adjacent[i]->degree_lock);
 			break;
 		}
-		omp_unset_lock(&adjacent[i]->degree_lock);
 	}
-	omp_unset_lock(&this->degree_lock);
 
 	return ret;
 }
@@ -73,24 +59,13 @@ long long Node::coloring()
 		omp_set_lock(&(adjacent[i]->n_color_lock));
 		adjacent[i]->n_color[color] = false;
 		omp_unset_lock(&(adjacent[i]->n_color_lock));
-
-		omp_set_lock(&(adjacent[i]->degree_lock));
-		if (adjacent[i]->n_flag == N_FLAG::UNCOLORED) {
-			adjacent[i]->degree -= 1;
-		}
-	}
-
-	for (int i = 0; i < adjacent.size(); i++) {
-		omp_unset_lock(&(adjacent[i]->degree_lock));
 	}
 
 	/*
 	* this->degree를 adjacent[i]->degree보다 먼저 변경할 경우,
 	* 인접한 두 노드가 서로 같은 색이 될 수 있다.
 	*/ 
-	omp_set_lock(&degree_lock);
 	this->degree = -1;
-	omp_unset_lock(&degree_lock);
 
 	this->n_flag = N_FLAG::COLORED;
 
