@@ -39,12 +39,22 @@ bool Node::is_priority()
 {
 	bool ret = true;
 	
+	if (omp_test_lock(&this->degree_lock) == 0)			return false;
+
 	for (int i = 0; i < adjacent.size(); i++) {
-		if (!compare(this, adjacent[i])) {
+		if (omp_test_lock(&adjacent[i]->degree_lock) == 0) {
 			ret = false;
 			break;
 		}
+
+		if (!compare(this, adjacent[i])) {
+			ret = false;
+			omp_unset_lock(&adjacent[i]->degree_lock);
+			break;
+		}
+		omp_unset_lock(&adjacent[i]->degree_lock);
 	}
+	omp_unset_lock(&this->degree_lock);
 
 	return ret;
 }
@@ -68,6 +78,9 @@ long long Node::coloring()
 		if (adjacent[i]->n_flag == N_FLAG::UNCOLORED) {
 			adjacent[i]->degree -= 1;
 		}
+	}
+
+	for (int i = 0; i < adjacent.size(); i++) {
 		omp_unset_lock(&(adjacent[i]->degree_lock));
 	}
 
