@@ -33,6 +33,7 @@ int TCB::select_task()
 		if (i == task.size() - 1 && count != task.size()) {
 			i = -1;
 			count = 0;
+			// 아 여기에 추가해 달라고요
 		}
 	}
 
