@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <algorithm>
+#include <ctime>
 #include "Node.h"
 
 using namespace std;
@@ -12,6 +13,10 @@ public:
 	int index;
 	// thread가 색칠해야 하는 Node들
 	vector<Node*> task;
+
+	long long select_ref_count;
+	long long coloring_ref_count;
+	clock_t running_time;
 
 	TCB();
 	TCB(int index);

@@ -1,16 +1,16 @@
 #include <iostream>
 #include <vector>
-#include <thread>
 #include <string>
 #include <fstream>
 #include <sstream>
 #include <algorithm>
-#include <windows.h>
+#include <omp.h>
 #include <ctime>
+#include <set>
 #include "Graph.h"
 #include "TCB.h"
 
-#define MAX_THREAD_NUM 4
+#define MAX_THREAD_NUM 8
 
 using namespace std;
 
@@ -65,6 +65,12 @@ bool make_graph(int data_index) {
 }
 
 void make_output(int data_index) {
+	set<int> colors;
+	for (int i = 0; i < graph->task.size(); i++) {
+		colors.insert(graph->task[i]->color);
+	}
+	graph->color_num = colors.size();
+
 	string fileName = "data\\output\\output";
 	fileName.append(to_string(data_index));
 	fileName.append(".txt");
@@ -77,6 +83,10 @@ void make_output(int data_index) {
 		str.append(1, '\n');
 		ofs.write(str.c_str(), str.size());
 	}
+	string str = "used color num : ";
+	str.append(to_string(graph->color_num));
+	str.append(1, '\n');
+	ofs.write(str.c_str(), str.size());
 	ofs.close();
 }
 
@@ -94,6 +104,7 @@ bool prove(int data_index) {
 	int index = 0;
 	while (getline(ifs, str)) {
 		if (str.empty())			break;
+		if (str[0] == 'u')			break;
 
 		graph->task[index]->color = stoi(str);
 		index++;
@@ -110,18 +121,30 @@ bool prove(int data_index) {
 			}
 		}
 	}
+
 	return ret;
 }
 
 void thread_work(int thread_idx) {
+	clock_t thread_start = clock();
+
+	TCB* m_tcb;
+	#pragma omp critical 
+	 m_tcb = tcb[thread_idx];
+
 	// thread 별로 가지고 있는 task를 degree 기준으로 내림차순 정렬함.
-	sort(tcb[thread_idx]->task.begin(), tcb[thread_idx]->task.end(), Node::compare);
+	sort(m_tcb->task.begin(), m_tcb->task.end(), Node::compare);
 
 	int node_idx = -1;
-	while ((node_idx = tcb[thread_idx]->select_task()) != -1) {
-		Node* node = tcb[thread_idx]->task[node_idx];
-		node->coloring();
+	while ((node_idx = m_tcb->select_task()) != -1) {
+		Node* node = m_tcb->task[node_idx];
+		m_tcb->coloring_ref_count += node->coloring(); 
 	}
+
+	clock_t thread_end = clock();
+	m_tcb->running_time = thread_end - thread_start;
+	#pragma omp critical
+	cout << "thread_idx is " << thread_idx << " and time is " << m_tcb->running_time << " ms\n";
 }
 
 int main(void) {
@@ -134,27 +157,28 @@ int main(void) {
 		cout << "test file is not open.\n";
 		return 0;
 	}
+	//bool prove_ret = prove(data_index);
 
-	vector<thread*> threads(MAX_THREAD_NUM, nullptr);
-	for (int i = 0; i < threads.size(); i++) {
+	for (int i = 0; i < MAX_THREAD_NUM; i++) {
 		tcb.push_back(new TCB(i));
 	}
 	graph->distribute_task_to_thread(tcb);
 
-	//ULONGLONG dw_start = GetTickCount64();
 	clock_t start_time = clock();
 
 	for (int i = 0; i < threads.size(); i++) {
 		threads[i] = new thread(thread_work, i);
 	}
 
-	for (int i = 0; i < threads.size(); i++) {
-		threads[i]->join();
+	#pragma omp parallel num_threads(MAX_THREAD_NUM)
+	{
+		int thread_idx = omp_get_thread_num();
+		thread_work(thread_idx);
 	}
 
+	#pragma omp barrier
 	clock_t end_time = clock();
 	cout << end_time - start_time << "ms\n";
-	//cout << GetTickCount64() - dw_start << " millisecond\n";
 
 	make_output(data_index);
 
