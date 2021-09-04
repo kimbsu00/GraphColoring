@@ -166,10 +166,6 @@ int main(void) {
 
 	clock_t start_time = clock();
 
-	for (int i = 0; i < threads.size(); i++) {
-		threads[i] = new thread(thread_work, i);
-	}
-
 	#pragma omp parallel num_threads(MAX_THREAD_NUM)
 	{
 		int thread_idx = omp_get_thread_num();
