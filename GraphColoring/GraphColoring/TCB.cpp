@@ -1,12 +1,12 @@
 #include "TCB.h"
 
 TCB::TCB()
-	: index(-1)
+	: index(-1), select_ref_count(0), coloring_ref_count(0)
 {
 }
 
 TCB::TCB(int index)
-	: index(index)
+	: index(index), select_ref_count(0), coloring_ref_count(0)
 {
 }
 
@@ -20,6 +20,7 @@ int TCB::select_task()
 	int count = 0;
 
 	for (int i = 0; i < task.size(); i++) {
+		select_ref_count++;
 		if (task[i]->n_flag == N_FLAG::UNCOLORED) {
 			if (task[i]->is_priority()) {
 				ret = i;
@@ -33,6 +34,7 @@ int TCB::select_task()
 		if (i == task.size() - 1 && count != task.size()) {
 			i = -1;
 			count = 0;
+			// 여기에 추가해주면 될듯
 		}
 	}
 

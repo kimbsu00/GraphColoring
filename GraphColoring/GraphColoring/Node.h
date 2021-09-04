@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <mutex>
+#include <omp.h>
 
 using namespace std;
 
@@ -16,8 +17,6 @@ public:
 	int index;
 	// 직접 연결되어 있는 Node의 수
 	int degree;
-	// degree에 대한 mutex
-	mutex degree_mutex;
 	// 직접 연결되어 있는 Node들
 	vector<Node*> adjacent;
 	// Node의 현재 상태를 의미함
@@ -26,8 +25,8 @@ public:
 	int color;
 	// Node에 index번째 색을 할당할 수 있는지를 나타냄
 	vector<bool> n_color;
-	// n_color에 대한 mutex
-	mutex n_color_mutex;
+	// n_color에 대한 lock
+	omp_lock_t n_color_lock;
 	
 	Node();
 	Node(int index);
@@ -46,6 +45,6 @@ public:
 	/*
 	* Node를 색칠하고, 색칠한 결과를 인접한 Node에 반영한다.
 	*/
-	void coloring();
+	long long coloring();
 };
 
