@@ -143,8 +143,8 @@ void thread_work(int thread_idx) {
 
 	clock_t thread_end = clock();
 	m_tcb->running_time = thread_end - thread_start;
-	#pragma omp critical
-	cout << "thread_idx is " << thread_idx << " and time is " << m_tcb->running_time << " ms\n";
+	//#pragma omp critical
+	//cout << "thread_idx is " << thread_idx << " and time is " << m_tcb->running_time << " ms\n";
 }
 
 int main(void) {
@@ -180,6 +180,10 @@ int main(void) {
 
 	bool prove_ret = prove(data_index);
 	cout << "prove value = " << (prove_ret ? "true" : "false") << "\n";
+
+	for (int i = 0; i < tcb.size(); i++) {
+		cout << "thread_idx is " << tcb[i]->index << " and time is " << tcb[i]->running_time << "ms\n";
+	}
 
 	return 0;
 }
