@@ -14,7 +14,11 @@ public:
 	// thread가 색칠해야 하는 Node들
 	vector<Node*> task;
 
+	// select_task 함수에서 참조한 Node의 개수
 	long long select_ref_count;
+	// select_task 에서 모든 task에 대하여 select 작업이 실패한 횟수
+	long long select_fail_count;
+	// Node.coloring 함수에서 참조한 Node의 개수
 	long long coloring_ref_count;
 	clock_t running_time;
 

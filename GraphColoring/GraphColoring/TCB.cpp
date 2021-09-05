@@ -1,12 +1,12 @@
 #include "TCB.h"
 
 TCB::TCB()
-	: index(-1), select_ref_count(0), coloring_ref_count(0)
+	: index(-1), select_ref_count(0), coloring_ref_count(0), select_fail_count(0)
 {
 }
 
 TCB::TCB(int index)
-	: index(index), select_ref_count(0), coloring_ref_count(0)
+	: index(index), select_ref_count(0), coloring_ref_count(0), select_fail_count(0)
 {
 }
 
@@ -32,6 +32,7 @@ int TCB::select_task()
 		}
 
 		if (i == task.size() - 1 && count != task.size()) {
+			select_fail_count++;
 			i = -1;
 			count = 0;
 		}
