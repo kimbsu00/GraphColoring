@@ -73,7 +73,7 @@ void make_output(int data_index) {
 
 	string fileName = "data\\output\\output";
 	fileName.append(to_string(data_index));
-	fileName.append("_r1.txt");
+	fileName.append(".txt");
 
 	ofstream ofs;
 	ofs.open(fileName);
@@ -93,7 +93,7 @@ void make_output(int data_index) {
 bool prove(int data_index) {
 	string fileName = "data\\output\\output";
 	fileName.append(to_string(data_index));
-	fileName.append("_r1.txt");
+	fileName.append(".txt");
 
 	ifstream ifs;
 	ifs.open(fileName);
