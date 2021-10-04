@@ -161,18 +161,16 @@ int main(void) {
 	}
 
 	clock_t start_time = clock();
-
-	#pragma omp parallel run_threads(MAX_THREAD_NUM) for
-	{
-		for (int i = 0; i < graph->task.size(); i++) {
-			graph->task[i]->calculate_priority();
-		}
+	omp_set_num_threads(MAX_THREAD_NUM);
+	#pragma omp parallel for
+	for (int i = 0; i < graph->task.size(); i++) {
+		graph->task[i]->calculate_priority();
 	}
-
+	
 	#pragma omp barrier
 	graph->distribute_task_to_thread(tcb);
 
-	#pragma omp parallel num_threads(MAX_THREAD_NUM)
+	#pragma omp parallel
 	{
 		int thread_idx = omp_get_thread_num();
 		thread_work(thread_idx);
