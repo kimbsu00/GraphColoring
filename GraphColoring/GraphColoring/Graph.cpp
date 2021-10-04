@@ -33,8 +33,11 @@ void Graph::distribute_task_to_thread(vector<TCB*>& tcb)
 {
 	const int mod = tcb.size();
 
-	for (int i = 0; i < task.size(); i++) {
-		int index = task[i]->index % mod;
-		tcb[index]->task.push_back(task[i]);
+	vector<Node*> tmp(task.begin(), task.end());
+	sort(tmp.begin(), tmp.end(), Node::compare_by_priority);
+
+	for (int i = 0; i < tmp.size(); i++) {
+		int index = i % mod;
+		tcb[index]->task.push_back(tmp[i]);
 	}
 }

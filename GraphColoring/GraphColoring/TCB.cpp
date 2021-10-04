@@ -22,7 +22,7 @@ int TCB::select_task()
 	for (int i = 0; i < task.size(); i++) {
 		select_ref_count++;
 		if (task[i]->n_flag == N_FLAG::UNCOLORED) {
-			if (task[i]->is_priority()) {
+			if (task[i]->priority == 0) {
 				ret = i;
 				break;
 			}

@@ -73,7 +73,7 @@ void make_output(int data_index) {
 
 	string fileName = "data\\output\\output";
 	fileName.append(to_string(data_index));
-	fileName.append(".txt");
+	fileName.append("_r1.txt");
 
 	ofstream ofs;
 	ofs.open(fileName);
@@ -93,7 +93,7 @@ void make_output(int data_index) {
 bool prove(int data_index) {
 	string fileName = "data\\output\\output";
 	fileName.append(to_string(data_index));
-	fileName.append(".txt");
+	fileName.append("_r1.txt");
 
 	ifstream ifs;
 	ifs.open(fileName);
@@ -128,12 +128,9 @@ bool prove(int data_index) {
 void thread_work(int thread_idx) {
 	clock_t thread_start = clock();
 
-	TCB* m_tcb;
+	TCB* m_tcb = nullptr;
 	#pragma omp critical 
 	 m_tcb = tcb[thread_idx];
-
-	// thread 별로 가지고 있는 task를 degree 기준으로 내림차순 정렬함.
-	sort(m_tcb->task.begin(), m_tcb->task.end(), Node::compare);
 
 	int node_idx = -1;
 	while ((node_idx = m_tcb->select_task()) != -1) {
@@ -151,7 +148,7 @@ int main(void) {
 	/*
 	* range of data_index is [1, 22].
 	*/
-	const int data_index = 17;
+	const int data_index = 22;
 
 	if (!make_graph(data_index)) {
 		cout << "test file is not open.\n";
@@ -162,9 +159,18 @@ int main(void) {
 	for (int i = 0; i < MAX_THREAD_NUM; i++) {
 		tcb.push_back(new TCB(i));
 	}
-	graph->distribute_task_to_thread(tcb);
 
 	clock_t start_time = clock();
+
+	#pragma omp parallel run_threads(MAX_THREAD_NUM) for
+	{
+		for (int i = 0; i < graph->task.size(); i++) {
+			graph->task[i]->calculate_priority();
+		}
+	}
+
+	#pragma omp barrier
+	graph->distribute_task_to_thread(tcb);
 
 	#pragma omp parallel num_threads(MAX_THREAD_NUM)
 	{
