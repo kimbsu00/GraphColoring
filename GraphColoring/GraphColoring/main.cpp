@@ -15,7 +15,7 @@
 
 using namespace std;
 
-// array of thread control block
+// Array of thread control block
 vector<TCB*> tcb;
 
 // Input Graph
@@ -144,7 +144,6 @@ void thread_work(int thread_idx) {
 	clock_t thread_start = clock();
 
 	TCB* m_tcb;
-	//#pragma omp critical 
 	 m_tcb = tcb[thread_idx];
 
 	// thread 별로 가지고 있는 task를 degree 기준으로 내림차순 정렬함.
