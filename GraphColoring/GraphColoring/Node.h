@@ -33,6 +33,11 @@ public:
 	Node(int index, int num_of_node);
 	~Node();
 
+	/*
+	* degree 기준으로 Node를 비교하는 함수
+	* degree가 클수록 높은 우선순위를 갖는다.
+	* 만약 degree가 같은 경우, index가 작은 Node가 높은 우선순위를 갖는다.
+	*/
 	static bool compare(const Node* a, const Node* b);
 
 	/*

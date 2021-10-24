@@ -27,9 +27,8 @@ public:
 	~TCB();
 
 	/*
-	* task 배열에 존재하는 Node들 중에서,
-	* thread가 색칠할 Node를 선택하고,
-	* 선택한 Node의 index를 리턴한다.
+	* task 배열에 존재하는 Node들 중에서, thread가 색칠할 Node를 선택한다.
+	* 만약 모든 Node가 색칠된 상태라면 -1을 리턴, 그렇지 않은 경우에는 선택한 Node의 index를 리턴한다.
 	*/
 	int select_task();
 };
