@@ -166,7 +166,7 @@ int main(void) {
 	cin >> file_name;
 
 	if (!make_graph(file_name)) {
-		cout << "test file is not open.\n";
+		cout << "Input file is not open.\n";
 		return 0;
 	}
 
