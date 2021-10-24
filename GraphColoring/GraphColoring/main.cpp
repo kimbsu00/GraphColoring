@@ -7,6 +7,7 @@
 #include <omp.h>
 #include <ctime>
 #include <set>
+#include <iomanip>
 #include "Graph.h"
 #include "TCB.h"
 
@@ -20,6 +21,10 @@ vector<TCB*> tcb;
 // Input Graph
 Graph* graph = nullptr;
 
+/*
+* delimeter 기준으로 input 문자열을 split하는 함수
+* 나누어진 문자열을 vector<string> 타입으로 리턴한다.
+*/
 vector<string> split(string& input, char delimiter) {
 	vector<string> answer;
 	stringstream ss(input);
@@ -32,13 +37,12 @@ vector<string> split(string& input, char delimiter) {
 	return answer;
 }
 
-bool make_graph(int data_index) {
-	string fileName = "data\\input\\test";
-	fileName.append(to_string(data_index));
-	fileName.append(".txt");
-
+/*
+* file_name에 위치한 .txt 파일로부터 데이터를 읽고, 그래프를 생성하는 함수
+*/
+bool make_graph(string file_name) {
 	ifstream ifs;
-	ifs.open(fileName);
+	ifs.open(file_name);
 
 	if (ifs.fail())			return false;
 	
@@ -64,19 +68,21 @@ bool make_graph(int data_index) {
 	return true;
 }
 
-void make_output(int data_index) {
+/*
+* data\output\output.txt 경로에 output을 저장하는 함수
+*/
+void make_output(string last_name) {
 	set<int> colors;
 	for (int i = 0; i < graph->task.size(); i++) {
 		colors.insert(graph->task[i]->color);
 	}
 	graph->color_num = colors.size();
 
-	string fileName = "data\\output\\output";
-	fileName.append(to_string(data_index));
-	fileName.append(".txt");
+	string file_name = "data\\output\\";
+	file_name.append(last_name);
 
 	ofstream ofs;
-	ofs.open(fileName);
+	ofs.open(file_name);
 
 	for (int i = 0; i < graph->task.size(); i++) {
 		string str = to_string(graph->task[i]->color);
@@ -88,15 +94,22 @@ void make_output(int data_index) {
 	str.append(1, '\n');
 	ofs.write(str.c_str(), str.size());
 	ofs.close();
+
+	cout << "\nThe path of output data's directory\n";
+	cout << "..\\GraphColoring\\GraphColoring\\GraphColoring\\data\\output\\" << last_name << "\n";
 }
 
-bool prove(int data_index) {
-	string fileName = "data\\output\\output";
-	fileName.append(to_string(data_index));
-	fileName.append(".txt");
+/*
+* 색칠된 그래프에 대하여, 인접한 노드가 서로 다른 색을 갖는지 확인하는 함수
+* 인접한 노드끼리 다른 색을 갖는 경우에는 return true
+* 인접한 노드끼리 같은 색을 갖는 경우에는 return false
+*/
+bool prove(string last_name) {
+	string file_name = "data\\output\\";
+	file_name.append(last_name);
 
 	ifstream ifs;
-	ifs.open(fileName);
+	ifs.open(file_name);
 
 	if (ifs.fail())			return false;
 
@@ -110,26 +123,28 @@ bool prove(int data_index) {
 		index++;
 	}
 
-	bool ret = true;
 	for (int i = 0; i < graph->task.size(); i++) {
 		Node* task = graph->task[i];
 		for (int j = 0; j < task->adjacent.size(); j++) {
 			Node* adj = graph->task[i]->adjacent[j];
 			if (task->color == adj->color) {
-				ret = false;
-				break;
+				return false;
 			}
 		}
 	}
 
-	return ret;
+	return true;
 }
 
+/*
+* Thread가 수행하는 함수
+* 색칠할 Node를 선택하고, 색칠하는 과정을 반복한다.
+*/
 void thread_work(int thread_idx) {
 	clock_t thread_start = clock();
 
 	TCB* m_tcb;
-	#pragma omp critical 
+	//#pragma omp critical 
 	 m_tcb = tcb[thread_idx];
 
 	// thread 별로 가지고 있는 task를 degree 기준으로 내림차순 정렬함.
@@ -143,21 +158,17 @@ void thread_work(int thread_idx) {
 
 	clock_t thread_end = clock();
 	m_tcb->running_time = thread_end - thread_start;
-	//#pragma omp critical
-	//cout << "thread_idx is " << thread_idx << " and time is " << m_tcb->running_time << " ms\n";
 }
 
 int main(void) {
-	/*
-	* range of data_index is [1, 22].
-	*/
-	const int data_index = 17;
+	string file_name = "";
+	cout << "Enter the input data's absolute path: ";
+	cin >> file_name;
 
-	if (!make_graph(data_index)) {
+	if (!make_graph(file_name)) {
 		cout << "test file is not open.\n";
 		return 0;
 	}
-	//bool prove_ret = prove(data_index);
 
 	for (int i = 0; i < MAX_THREAD_NUM; i++) {
 		tcb.push_back(new TCB(i));
@@ -174,15 +185,21 @@ int main(void) {
 
 	#pragma omp barrier
 	clock_t end_time = clock();
-	cout << end_time - start_time << "ms\n";
 
-	make_output(data_index);
-
-	bool prove_ret = prove(data_index);
-	cout << "prove value = " << (prove_ret ? "true" : "false") << "\n";
-
+	cout << left;
+	cout << "\nTotal Runtime\t" << end_time - start_time << "ms\n";
 	for (int i = 0; i < tcb.size(); i++) {
-		cout << "thread_idx is " << tcb[i]->index << " and time is " << tcb[i]->running_time << "ms\n";
+		cout << setw(10) << "Thread" << setw(5) << tcb[i]->index << setw(10) << "Runtime" << tcb[i]->running_time << "ms\n";
+	}
+
+	vector<string> tmp = split(file_name, '\\');
+	make_output(tmp.back());
+
+	if (prove(tmp.back())) {
+		cout << "\nThere is no pair of node that has same color.\n";
+	}
+	else {
+		cout << "\nThere is pair of node that has same color.\n";
 	}
 
 	return 0;
