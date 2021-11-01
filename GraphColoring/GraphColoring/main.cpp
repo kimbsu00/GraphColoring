@@ -11,7 +11,7 @@
 #include "Graph.h"
 #include "TCB.h"
 
-#define MAX_THREAD_NUM 8
+#define MAX_THREAD_NUM 4
 
 using namespace std;
 
@@ -182,7 +182,6 @@ int main(void) {
 		thread_work(thread_idx);
 	}
 
-	#pragma omp barrier
 	clock_t end_time = clock();
 
 	cout << left;
