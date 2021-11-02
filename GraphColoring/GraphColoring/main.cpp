@@ -11,7 +11,7 @@
 #include "Graph.h"
 #include "TCB.h"
 
-#define MAX_THREAD_NUM 4
+#define MAX_THREAD_NUM 8
 
 using namespace std;
 
@@ -193,6 +193,7 @@ int main(void) {
 	vector<string> tmp = split(file_name, '\\');
 	make_output(tmp.back());
 
+	cout << "\nused color num : " << graph->color_num << "\n";
 	if (prove(tmp.back())) {
 		cout << "\nThere is no pair of node that has same color.\n";
 	}
